@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript">
+
+function viewXML(){
+	
+	xmlFileName = document.getElementById("xmlFileInput").value;		//stores the name of the file typed in the text box having the id 'xmlFileInput' 
+																		//into the variable xmlFileName
+	xmlFileName.replace(/^\s+$/, "");									//used to delete the white spaces before and after the text typed in the text box
+	
+	if(xmlFileName==null || xmlFileName=='' || xmlFileName == undefined) {
+		alert("The text box cannot be left empty. Please enter an xml file url");
+	}
+	else {
+    if (window.XMLHttpRequest) {				//The XMLHttpRequest object is used to exchange data with a server behind the scenes. The 'window' here is 	
+												//used to check the browser version
+	  // code for IE7+, Firefox, Chrome, Opera, Safari
+		xmlhttp=new XMLHttpRequest();   
+		}
+	else {
+	// code for IE6, IE5
+		xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");  
+		}
+	
+	xmlhttp.open("GET",xmlFileName,false);	//Specifies the type of request, the URL, and if the request should be handled asynchronously or not.
+											//method: the type of request: GET or POST
+											//url: the location of the file on the server
+											//async: true (asynchronous) or false (synchronous) - synchronous means multiple javascripts can run in parallel while the current statement is being executed
+	xmlhttp.send(null);						//Sends the request off to the server.
+											//string: Only used for POST requests
+	xmlDoc=xmlhttp.responseXML;				//this statement outputs an XML file AFTER completely parsing the 'xmlFileName' and outputs that file only if it 
+											//has NO errors. If it has even a single error, then the parser cannot parse the xmlFileName correctly and thus stops the further processing of the file and generates a generic file having the tags <parseerror></parseerror> with the description node having the description of the error and which child node in this generic file gave the error.
+	
+	if(xmlDoc==null)
+		alert("Invalid XML!!");
+	
+	
+	
+	var me=xmlDoc.documentElement;		//thus, 'me' has stored the tag catalog in itself
+	if(me.nodeName!='catalog') {		//if <catalog> is not present, then the whole XML file is considered to be invalid
+		alert("Error in XML file");
+	}
+	else{
+	var html_text="<html><bo"+"dy><table border='2'><tr>";		//the statement is used to store the html code to create a table in  the variable 'hmtl_text'
+																//Q.My file works fine for everything when I test it locally, however, when I copy it to the server and then test it, after I click on "submit query", it has no reaction. What are possible reasons?
+																//A. The system checks for a </body> tag and inserts its disclaimer just above this tag. The trick is to either split this body tag into </bo + dy> or to give a dummy </body> (commented) just before your JS begins. This way system will insert its code into the commented section and so it doesn't appear in your page.
+	
+	for(k=0;k<me.children[0].children.length;k++) {		//k<catalog.book[0] che children cha length
+		var x = me.children[0].children[k].nodeName;
+		html_text+="<td><b>" + x +"</b></td>";
+	}
+	html_text+="</tr>";
+	var blank="N/A";
+	
+	
+	for(i=0;i<me.children.length;i++) {
+		var you=me.children[i];		//thus, 'you' stores each of the book tags in every iteration
+	
+		
+			html_text+="<tr>";
+			for(j=0; j<you.children.length-1;j++) {
+				var y=you.children[j].innerHTML;				//y stores children's data
+				if(y=="") {
+					html_text+="<td>" + blank +"</td>";
+				}
+				else
+					html_text+="<td>" + y +"</td>";
+			}
+			if(y=="")
+				html_text+="<td>" + "N/A"+"</td>";    //this statement is not working...just shows an unknown image file in the output
+			else
+				html_text+="<td><img height=\"100\" width=\"100\" src=\""+you.children[j].innerHTML+"\" alt="+blank+"\></td>";
+	
+		html_text+="</tr>";
+	}
+	html_text+="</table></bo"+"dy></html>"; 
+	
+	winD = window.open("","newWin","");				//used to open a new window and store it in the variable
+													//window.open(URL,name,specs,replace). For the parameters, go to http://www.w3schools.com/jsref/met_win_open.asp
+	winD.document.write(html_text);
+	winD.document.close();
+		}
+	}
+}
+	             		
+
+</script>
+</head>
+
+
+<body>
+
+<div id="bookresult">
+<p>Enter XML file</p>
+</div>
+<form name="myform" id="location" ">
+<input type="text" id="xmlFileInput" name="URL" maxlength="255" size="100" value="" />		//this line creates a text box and gives it the id 			
+																							//'xmlFileInput'	
+<br />
+<input type="submit" name="submit" value="Submit Query" onClick="viewXML()"/>				//this line creates a button which has "Submit Query" written 	
+																							//inside it and on clicking this button, it calls viewXML()
+																							//Form onsubmit is a more correct approach, for the simple reason that a form can also be submitted with the <ENTER> key, and not just by clicking the submit button.
+</form>
+
+<NOSCRIPT>
+</body>
+</html>
